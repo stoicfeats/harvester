@@ -200,7 +200,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       <div
         className="p-6 rounded-[2px] transition-shadow duration-500"
-        style={{ backgroundColor: theme.BG }}
+        style={{ backgroundColor: theme.BG, boxShadow: theme.SHADOW_INSET }}
       >
         <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>Ingest Data</label>
 
@@ -215,8 +215,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex flex-col gap-3">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className={`w-full py-4 px-4 text-left flex justify-between items-center hover:brightness-95 transition-all rounded-[1px] ${darkMode ? theme.SHADOW : theme.SHADOW} active:${theme.SHADOW_ACTIVE} active:scale-[0.98]`}
-            style={{ backgroundColor: theme.BG, color: theme.TEXT }}
+            className="w-full py-4 px-4 text-left flex justify-between items-center hover:brightness-95 transition-all rounded-[1px] active:scale-[0.98]"
+            style={{
+              backgroundColor: theme.BG,
+              color: theme.TEXT,
+              boxShadow: theme.SHADOW
+            }}
           >
             <span className="text-sm font-bold font-['Space_Grotesk'] tracking-tight">{TEXT.DRAG_DROP}</span>
             <span className="font-mono text-[10px] opacity-50">.json</span>
@@ -228,7 +232,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             style={{
               backgroundColor: theme.BG,
               color: theme.TEXT,
-              boxShadow: isPasteMode ? undefined : theme.SHADOW
+              boxShadow: isPasteMode ? theme.SHADOW_ACTIVE : theme.SHADOW
             }}
           >
             <span className="text-xs font-bold font-['Space_Grotesk'] tracking-tight opacity-70">{TEXT.OR_PASTE}</span>
@@ -261,7 +265,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className={`p-6 rounded-[2px] transition-shadow duration-500`} style={{ backgroundColor: theme.BG }}>
+      <div className={`p-6 rounded-[2px] transition-shadow duration-500`} style={{ backgroundColor: theme.BG, boxShadow: theme.SHADOW_INSET }}>
         <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>{TEXT.VIEW_CONFIG}</label>
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center mb-1">
@@ -283,7 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className={`p-6 rounded-[2px] transition-shadow duration-500`} style={{ backgroundColor: theme.BG }}>
+      <div className={`p-6 rounded-[2px] transition-shadow duration-500`} style={{ backgroundColor: theme.BG, boxShadow: theme.SHADOW_INSET }}>
         <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>Utility Protocols</label>
 
         <button
@@ -292,7 +296,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           style={{
             backgroundColor: theme.BG,
             color: theme.TEXT,
-            boxShadow: isScriptMode ? undefined : theme.SHADOW
+            boxShadow: isScriptMode ? theme.SHADOW_ACTIVE : theme.SHADOW
           }}
         >
           <span className="text-xs font-bold font-['Space_Grotesk'] tracking-tight opacity-70">{TEXT.GENERATE_SCRAPER}</span>

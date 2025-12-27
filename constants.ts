@@ -5,9 +5,9 @@ export const COLORS = {
         ACCENT: '#ff4d00',
         BORDER: 'rgba(0,0,0,0.1)',
         CARD_BG: '#e2e0d9',
-        SHADOW: 'shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.6)]',
-        SHADOW_ACTIVE: 'shadow-[inset_2px_2px_4px_rgba(0,0,0,0.15),inset_-2px_-2px_4px_rgba(255,255,255,0.6)]',
-        SHADOW_INSET: 'shadow-[inset_6px_6px_12px_rgba(0,0,0,0.15),inset_-6px_-6px_12px_rgba(255,255,255,0.6)]',
+        SHADOW: '4px 4px 8px rgba(0,0,0,0.15), -4px -4px 8px rgba(255,255,255,0.6)',
+        SHADOW_ACTIVE: 'inset 2px 2px 4px rgba(0,0,0,0.15), inset -2px -2px 4px rgba(255,255,255,0.6)',
+        SHADOW_INSET: 'inset 6px 6px 12px rgba(0,0,0,0.15), inset -6px -6px 12px rgba(255,255,255,0.6)',
         SHADOW_HOVER: 'hover:shadow-[6px_6px_12px_rgba(0,0,0,0.2),-6px_-6px_12px_rgba(255,255,255,0.8)]',
     },
     DARK: {
@@ -16,9 +16,9 @@ export const COLORS = {
         ACCENT: '#ff4d00',
         BORDER: 'rgba(226,224,217,0.1)',
         CARD_BG: '#222222',
-        SHADOW: 'shadow-[4px_4px_8px_rgba(0,0,0,0.6),-1px_-1px_2px_rgba(255,255,255,0.05)]',
-        SHADOW_ACTIVE: 'shadow-[inset_2px_2px_4px_rgba(0,0,0,0.6),inset_-1px_-1px_2px_rgba(255,255,255,0.05)]',
-        SHADOW_INSET: 'shadow-[inset_4px_4px_8px_rgba(0,0,0,0.6),inset_-1px_-1px_2px_rgba(255,255,255,0.05)]',
+        SHADOW: '4px 4px 8px rgba(0,0,0,0.6), -1px -1px 2px rgba(255,255,255,0.05)',
+        SHADOW_ACTIVE: 'inset 2px 2px 4px rgba(0,0,0,0.6), inset -1px -1px 2px rgba(255,255,255,0.05)',
+        SHADOW_INSET: 'inset 4px 4px 8px rgba(0,0,0,0.6), inset -1px -1px 2px rgba(255,255,255,0.05)',
         SHADOW_HOVER: 'hover:shadow-[6px_6px_12px_rgba(0,0,0,0.7),-1px_-1px_2px_rgba(255,255,255,0.1)]',
     }
 };

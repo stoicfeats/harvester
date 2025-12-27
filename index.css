@@ -2,6 +2,7 @@
 
 @theme {
     --font-space-grotesk: "Space Grotesk", sans-serif;
+    --font-mono: "Space Mono", monospace;
 }
 
 /* Custom Utilities */
