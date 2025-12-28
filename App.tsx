@@ -36,10 +36,10 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [tweets, setTweets] = useState<Tweet[]>([]);
-  const [darkMode, setDarkMode] = useState(true); // Default to dark for "hackerman" feel
+  const [darkMode, setDarkMode] = useState(true); 
   const [columnCount, setColumnCount] = useState(3);
   const [activeSegment, setActiveSegment] = useState(SEGMENTS[0].id);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Placeholder for next step
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); 
 
   // 1. Initial Load: Check Local Storage first
   useEffect(() => {
@@ -53,7 +53,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // 2. Auth Listener
+  // 2. Auth Listener Here
   useEffect(() => {
     if (!isFirebaseInitialized || !auth) {
       setLoading(false);
