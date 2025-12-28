@@ -7,6 +7,7 @@ import { TextureOverlay } from './components/TextureOverlay';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { MasonryGrid } from './components/MasonryGrid';
+import { LoginModal } from './components/LoginModal';
 import { Tweet } from './types';
 import { COLORS, SEGMENTS, TEXT, LINKS } from './constants';
 // @ts-ignore
@@ -29,6 +30,8 @@ const normalizeLocalDump = (data: any[]): Tweet[] => {
 };
 
 
+const LOCAL_STORAGE_KEY = 'harvester_local_tweets_v1';
+
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,16 +39,22 @@ const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true); // Default to dark for "hackerman" feel
   const [columnCount, setColumnCount] = useState(3);
   const [activeSegment, setActiveSegment] = useState(SEGMENTS[0].id);
-  const [offlineMode, setOfflineMode] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Placeholder for next step
 
+  // 1. Initial Load: Check Local Storage first
   useEffect(() => {
-    if (offlineMode) {
-      setLoading(false);
-      const normalized = normalizeLocalDump(localDump as any[]);
-      setTweets(normalized);
-      return;
+    const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (cached) {
+      try {
+        setTweets(JSON.parse(cached));
+      } catch (e) {
+        console.error("Failed to load local cache", e);
+      }
     }
+  }, []);
 
+  // 2. Auth Listener
+  useEffect(() => {
     if (!isFirebaseInitialized || !auth) {
       setLoading(false);
       return;
@@ -55,33 +64,32 @@ const App: React.FC = () => {
       setLoading(false);
     });
     return () => unsubscribe();
-  }, [offlineMode]);
+  }, []);
 
-  // Firestore Realtime Listener
+  // 3. Firestore Sync (Only if User)
   useEffect(() => {
-    if (offlineMode) return; // Skip firestore in offline mode
+    if (!user || !db) return;
 
-    if (!user || !db) {
-      if (!offlineMode) setTweets([]);
-      return;
-    }
-
-    const q = query(collection(db, `users/${user.uid}/tweets`), orderBy('id', 'desc')); // Assuming simple ordering for now
-    // Note: Actual ordering might depend on created_at string parsing or a specific timestamp field added during ingestion.
-
+    const q = query(collection(db, `users/${user.uid}/tweets`), orderBy('id', 'desc'));
 
     const unsubscribe = onSnapshot(collection(db, `users/${user.uid}/tweets`), (snapshot) => {
       const loadedTweets: Tweet[] = [];
       snapshot.forEach((doc) => {
         loadedTweets.push(doc.data() as Tweet);
       });
-      // Sort manually since created_at is a string
       loadedTweets.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setTweets(loadedTweets);
     });
 
     return () => unsubscribe();
-  }, [user, offlineMode]);
+  }, [user]);
+
+  // 4. Local Storage Sync (Only if Guest)
+  useEffect(() => {
+    if (!user && tweets.length > 0) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tweets));
+    }
+  }, [tweets, user]);
 
   useEffect(() => {
     document.body.style.backgroundColor = darkMode ? COLORS.DARK.BG : COLORS.LIGHT.BG;
@@ -97,7 +105,7 @@ const App: React.FC = () => {
   };
 
   const handleDataLoaded = (newTweets: Tweet[]) => {
-    setTweets(newTweets);
+    setTweets(newTweets); // This will trigger the Local Storage Sync effect
   };
 
   const filteredTweets = tweets.filter(t => {
@@ -117,12 +125,12 @@ const App: React.FC = () => {
         <div className="w-16 h-16 border-2 mb-4 animate-pulse rounded-full flex items-center justify-center border-white/20">
           <div className="w-2 h-2 bg-white/40"></div>
         </div>
-        <p className="font-mono text-xs uppercase tracking-widest animate-pulse">Establishing Connection...</p>
+        <p className="font-mono text-xs uppercase tracking-widest animate-pulse">Initializing Core...</p>
       </div>
     );
   }
 
-  if (!isFirebaseInitialized && !offlineMode) {
+  if (!isFirebaseInitialized) {
     return (
       <div className="w-full h-screen flex flex-col items-center justify-center relative overflow-hidden text-center p-8"
         style={{ backgroundColor: COLORS.DARK.BG, color: COLORS.DARK.TEXT }}>
@@ -141,63 +149,9 @@ const App: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => setOfflineMode(true)}
-          className="px-6 py-2 border border-white/20 hover:bg-white hover:text-black transition-colors font-mono text-xs uppercase"
-        >
-          Start Offline Mode
-        </button>
-
         <p className="font-mono text-[9px] mt-8 opacity-30">ERR_CODE: ENV_VARS_UNDEFINED</p>
       </div>
     )
-  }
-
-  if (!user && !offlineMode) {
-    return (
-      <div className="w-full h-screen flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ backgroundColor: COLORS.DARK.BG, color: COLORS.DARK.TEXT }}>
-        <TextureOverlay />
-        <div className="z-10 text-center space-y-8 p-12 border border-white/10 relative">
-          {/* Decorative corners */}
-          <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/40"></div>
-          <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/40"></div>
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/40"></div>
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/40"></div>
-
-          <div>
-            <h1 className="text-6xl font-black tracking-tighter mb-2 font-['Space_Grotesk']">HARVESTER</h1>
-            <p className="font-mono text-xs tracking-[0.5em] opacity-50 uppercase">Restricted Access // Protocol 88-X</p>
-          </div>
-
-          <div className="font-mono text-[10px] space-y-2 opacity-60">
-            <p>SYSTEM_STATUS: <span className="text-red-500 animate-pulse">LOCKED</span></p>
-            <p>ENCRYPTION: AES-256</p>
-            <p>DATALINK: OFFLINE</p>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <button
-              onClick={handleLogin}
-              className="group relative px-8 py-3 bg-white text-black font-mono font-bold text-xs hover:bg-[#ff4d00] transition-colors"
-            >
-              <span className="relative z-10">INITIATE_CONNECTION_HANDSHAKE</span>
-              <div className="absolute inset-0 border border-white transform translate-x-1 translate-y-1 group-hover:translate-x-1.5 group-hover:translate-y-1.5 transition-transform"></div>
-            </button>
-
-            <button
-              onClick={() => setOfflineMode(true)}
-              className="font-mono text-[10px] opacity-50 hover:opacity-100 underline decoration-dotted transition-opacity"
-            >
-              ACCESS LOCAL ARCHIVES (OFFLINE)
-            </button>
-          </div>
-        </div>
-        <div className="absolute bottom-8 font-mono text-[10px] opacity-20">
-          SECURE TERMINAL // AUTHORIZED PERSONNEL ONLY
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -221,6 +175,7 @@ const App: React.FC = () => {
             // We no longer pass onDataLoaded for local state, but we pass user to save to DB
             user={user}
             onDataLoaded={handleDataLoaded} // RESTORED local handler
+            onLoginClick={() => setIsLoginModalOpen(true)}
             totalTweets={tweets.length}
             tweets={tweets} // Still needed for export if we want export functionality
             darkMode={darkMode}
@@ -265,12 +220,12 @@ const App: React.FC = () => {
                   </button>
                 ))}
 
-                {/* Logout Button in Segment Bar for quick access */}
-                {!offlineMode && (
+                {/* Login / Logout Button in Segment Bar */}
+                {user ? (
                   <button
                     onClick={() => auth && signOut(auth)}
                     className="ml-2 w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-500/20 text-red-500 transition-colors"
-                    title="Terminate Session"
+                    title="Sign Out"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -278,17 +233,13 @@ const App: React.FC = () => {
                       <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
                   </button>
-                )}
-                {offlineMode && (
+                ) : (
                   <button
-                    onClick={() => setOfflineMode(false)}
-                    className="ml-2 w-6 h-6 rounded-full flex items-center justify-center hover:bg-blue-500/20 text-blue-500 transition-colors"
-                    title="Try Connecting Again"
+                    onClick={() => setIsLoginModalOpen(true)}
+                    className="ml-2 px-3 py-1 rounded-full flex items-center justify-center hover:bg-green-500/20 text-green-500 transition-colors border border-green-500/30 text-[10px] font-mono uppercase"
+                    title="Login to Sync"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
-                      <line x1="12" y1="2" x2="12" y2="12"></line>
-                    </svg>
+                    Login / Sync
                   </button>
                 )}
               </div>
@@ -320,15 +271,26 @@ const App: React.FC = () => {
             <span className="font-mono text-[9px] uppercase tracking-widest opacity-60">
               {tweets.length > 0 ? `${TEXT.STREAM_ACTIVE} // ${activeSegment}_FILTER` : `${TEXT.STREAM_IDLE} // ${TEXT.AWAITING_INPUT}`}
             </span>
+            {!user && tweets.length > 0 && (
+              <span className="font-mono text-[9px] text-yellow-500 opacity-80 ml-2">
+                [LOCAL_STORAGE_ACTIVE]
+              </span>
+            )}
           </div>
           <div className="font-mono text-[9px] opacity-40 flex gap-4">
-            <span>USER: {offlineMode ? 'LOCAL_MOCK_USER' : user?.email}</span>
+            <span>USER: {user ? user.email : 'GUEST_ACCESS'}</span>
             <a href={LINKS.STOICFEATS} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-opacity">
               {TEXT.FOOTER_CREDIT}
             </a>
           </div>
         </footer>
       </motion.div>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        darkMode={darkMode}
+      />
     </>
   );
 };

@@ -34,8 +34,9 @@ const normalizeData = (raw: any): Tweet[] => {
 };
 
 interface SidebarProps {
-  onDataLoaded: (tweets: Tweet[]) => void;
   user: User | null;
+  onDataLoaded: (data: Tweet[]) => void;
+  onLoginClick: () => void;
   totalTweets: number;
   tweets: Tweet[];
   darkMode: boolean;
@@ -44,8 +45,9 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  onDataLoaded,
   user,
+  onDataLoaded,
+  onLoginClick,
   totalTweets,
   tweets,
   darkMode,
