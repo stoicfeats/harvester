@@ -1,6 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { Tweet } from '../types';
 import { TEXT, COLORS } from '../constants';
+import { User } from 'firebase/auth';
+import { db } from '../firebaseConfig';
+import { writeBatch, doc } from 'firebase/firestore';
 
 const normalizeData = (raw: any): Tweet[] => {
   let list: any[] = [];
@@ -23,7 +26,7 @@ const normalizeData = (raw: any): Tweet[] => {
         screen_name: 'me',
         profile_image_url_https: ''
       },
-      extended_entities: t.extended_entities,
+      extended_entities: t.extended_entities || null,
       favorite_count: t.favorite_count || 0,
       retweet_count: t.retweet_count || 0
     } as Tweet;
@@ -32,6 +35,7 @@ const normalizeData = (raw: any): Tweet[] => {
 
 interface SidebarProps {
   onDataLoaded: (tweets: Tweet[]) => void;
+  user: User | null;
   totalTweets: number;
   tweets: Tweet[];
   darkMode: boolean;
@@ -41,6 +45,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({
   onDataLoaded,
+  user,
   totalTweets,
   tweets,
   darkMode,
@@ -53,6 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [isScriptMode, setIsScriptMode] = useState(false);
   const [targetCount, setTargetCount] = useState(50);
   const [generatedScript, setGeneratedScript] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const theme = darkMode ? COLORS.DARK : COLORS.LIGHT;
 
@@ -64,7 +70,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const shadowNeuActive = theme.SHADOW_ACTIVE;
   const shadowNeuInset = theme.SHADOW_INSET;
 
+  const batchUploadTweets = async (tweetsToUpload: Tweet[]) => {
+    if (!user) {
+      alert("AUTHENTICATION_ERROR: Session invalid. Please log in.");
+      return;
+    }
+    setUploading(true);
+    console.log(`[UPLOAD] Starting batch upload for ${tweetsToUpload.length} items...`);
 
+    try {
+      // Firestore batch limit is 500
+      const chunkSize = 450;
+      for (let i = 0; i < tweetsToUpload.length; i += chunkSize) {
+        const chunk = tweetsToUpload.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+
+        chunk.forEach((tweet) => {
+          const ref = doc(db, `users/${user.uid}/tweets`, tweet.id);
+          batch.set(ref, tweet);
+        });
+
+        await batch.commit();
+        console.log(`[UPLOAD] Batch ${Math.floor(i / chunkSize) + 1} commit successful.`);
+      }
+      alert(`UPLOAD COMPLETE: ${tweetsToUpload.length} records archived.`);
+    } catch (error: any) {
+      console.error("Batch upload failed:", error);
+      alert(`UPLOAD_ERROR: ${error.message || "Data persistence failed."}`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -75,7 +111,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       try {
         const json = JSON.parse(e.target?.result as string);
         const normalized = normalizeData(json);
-        onDataLoaded(normalized);
+        onDataLoaded(normalized); // Update UI immediately
+        if (user) {
+          batchUploadTweets(normalized); // Upload if logged in
+        }
       } catch (err) {
         alert("PROTOCOL_ERROR: Invalid JSON structure detected.");
         console.error(err);
@@ -90,7 +129,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const cleanContent = pastedContent.replace(/^[a-zA-Z0-9_.$]+\s*=\s*/, '');
       const json = JSON.parse(cleanContent);
       const normalized = normalizeData(json);
-      onDataLoaded(normalized);
+      onDataLoaded(normalized); // Update UI immediately
+      if (user) {
+        batchUploadTweets(normalized); // Upload if logged in
+      }
       setPastedContent('');
       setIsPasteMode(false);
     } catch (err) {
@@ -200,9 +242,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       <div
         className="p-6 rounded-[2px] transition-shadow duration-500"
-        style={{ backgroundColor: theme.BG, boxShadow: theme.SHADOW_INSET }}
+        style={{
+          backgroundColor: theme.BG,
+          boxShadow: theme.SHADOW_INSET,
+          opacity: uploading ? 0.5 : 1,
+          pointerEvents: uploading ? 'none' : 'auto'
+        }}
       >
-        <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>Ingest Data</label>
+        <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>
+          {uploading ? 'UPLOADING TO CLOUD...' : 'Ingest Data'}
+        </label>
 
         <input
           type="file"
