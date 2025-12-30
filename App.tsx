@@ -48,7 +48,7 @@ const App: React.FC = () => {
       try {
         setTweets(JSON.parse(cached));
       } catch (e) {
-        console.error("Failed to load local cache", e);
+        console.error("Failed to load local cache in memory", e);
       }
     }
   }, []);
