@@ -13,7 +13,7 @@ import { COLORS, SEGMENTS, TEXT, LINKS } from './constants';
 // @ts-ignore
 import localDump from './harvest_dump_1766768955732.json';
 
-// Simple normalization for the dump file if needed
+
 const normalizeLocalDump = (data: any[]): Tweet[] => {
   return data.map((item) => {
     const t = item.tweet || item;
@@ -36,12 +36,11 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [tweets, setTweets] = useState<Tweet[]>([]);
-  const [darkMode, setDarkMode] = useState(true); 
+  const [darkMode, setDarkMode] = useState(true);
   const [columnCount, setColumnCount] = useState(3);
   const [activeSegment, setActiveSegment] = useState(SEGMENTS[0].id);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); 
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // 1. Initial Load: Check Local Storage first
   useEffect(() => {
     const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (cached) {
@@ -53,7 +52,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // 2. Auth Listener Here
   useEffect(() => {
     if (!isFirebaseInitialized || !auth) {
       setLoading(false);
@@ -66,7 +64,6 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // 3. Firestore Sync (Only if User)
   useEffect(() => {
     if (!user || !db) return;
 
@@ -84,7 +81,6 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, [user]);
 
-  // 4. Local Storage Sync (Only if Guest)
   useEffect(() => {
     if (!user && tweets.length > 0) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tweets));
@@ -105,7 +101,7 @@ const App: React.FC = () => {
   };
 
   const handleDataLoaded = (newTweets: Tweet[]) => {
-    setTweets(newTweets); // This will trigger the Local Storage Sync effect
+    setTweets(newTweets);
   };
 
   const filteredTweets = tweets.filter(t => {
@@ -172,12 +168,11 @@ const App: React.FC = () => {
 
         <div className="flex flex-1 overflow-hidden">
           <Sidebar
-            // We no longer pass onDataLoaded for local state, but we pass user to save to DB
             user={user}
-            onDataLoaded={handleDataLoaded} // RESTORED local handler
+            onDataLoaded={handleDataLoaded}
             onLoginClick={() => setIsLoginModalOpen(true)}
             totalTweets={tweets.length}
-            tweets={tweets} // Still needed for export if we want export functionality
+            tweets={tweets}
             darkMode={darkMode}
             columnCount={columnCount}
             setColumnCount={setColumnCount}
@@ -220,7 +215,6 @@ const App: React.FC = () => {
                   </button>
                 ))}
 
-                {/* Login / Logout Button in Segment Bar */}
                 {user ? (
                   <button
                     onClick={() => auth && signOut(auth)}
