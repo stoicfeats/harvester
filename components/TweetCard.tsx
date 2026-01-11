@@ -12,16 +12,21 @@ export const TweetCard: React.FC<{ tweet: Tweet; darkMode: boolean }> = ({ tweet
 
   const tweetUrl = `${LINKS.X_BASE}/${tweet.user?.screen_name || 'i'}/status/${tweet.id}`;
 
+
+  const [expanded, setExpanded] = React.useState(false);
+
   return (
-    <a
-      href={tweetUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+
+
+    <div
       className={`block relative group transition-transform duration-300 hover:-translate-y-1`}
       style={{ color: theme.TEXT }}
     >
-      <div
-        className={`p-4 rounded-[2px] transition-all duration-300 border ${darkMode ? theme.SHADOW_HOVER : theme.SHADOW_HOVER}`}
+      <a
+        href={tweetUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`block p-4 rounded-[2px] transition-all duration-300 border ${darkMode ? theme.SHADOW_HOVER : theme.SHADOW_HOVER}`}
         style={{
           backgroundColor: theme.CARD_BG,
           borderColor: darkMode ? 'rgba(255,255,255,0.05)' : 'transparent',
@@ -31,6 +36,7 @@ export const TweetCard: React.FC<{ tweet: Tweet; darkMode: boolean }> = ({ tweet
 
         <div className="flex items-start justify-between mb-3 opacity-80">
           <div className="flex gap-2 items-center">
+            {/* User Info... same... */}
             <div className="w-8 h-8 rounded-full overflow-hidden relative" style={{ backgroundColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}>
               {tweet.user?.profile_image_url_https ? (
                 <img src={tweet.user.profile_image_url_https} alt="" className="w-full h-full object-cover grayscale contrast-125" />
@@ -46,22 +52,43 @@ export const TweetCard: React.FC<{ tweet: Tweet; darkMode: boolean }> = ({ tweet
           <span className="font-mono text-[8px] opacity-40">{dateStr}</span>
         </div>
 
-        <p className="font-['Space_Grotesk'] text-sm leading-relaxed mb-3 whitespace-pre-wrap">
-          {tweet.full_text}
-        </p>
+        <div
+          className={`relative overflow-hidden transition-all duration-500`}
+          style={{
+            maxHeight: expanded ? 'none' : '500px',
+          }}
+        >
+          <p className="font-['Space_Grotesk'] text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+            {tweet.full_text}
+          </p>
 
-        {hasMedia && (
-          <div className={`mb-3 rounded-sm overflow-hidden border`} style={{ borderColor: theme.BORDER }}>
-            {tweet.extended_entities!.media.map((media) => (
-              <img
-                key={media.media_url_https}
-                src={media.media_url_https}
-                alt="Tweet Attachment"
-                className="w-full h-auto block grayscale hover:grayscale-0 transition-all duration-500"
-              />
-            ))}
-          </div>
-        )}
+          {hasMedia && (
+            <div className={`mb-3 rounded-sm overflow-hidden border`} style={{ borderColor: theme.BORDER }}>
+              {tweet.extended_entities!.media.map((media) => (
+                <img
+                  key={media.media_url_https}
+                  src={media.media_url_https}
+                  alt="Tweet Attachment"
+                  className="w-full h-auto block grayscale hover:grayscale-0 transition-all duration-500"
+                />
+              ))}
+            </div>
+          )}
+
+          {!expanded && (tweet.full_text.length > 500 || (hasMedia && tweet.extended_entities!.media.length > 0)) && (
+            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t pointer-events-none" style={{ from: theme.CARD_BG, to: 'transparent' }}></div>
+          )}
+        </div>
+
+        {/* Toggle Expand, preventing default link click if clicked */}
+        <div
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setExpanded(!expanded); }}
+          className="w-full text-center py-2 cursor-pointer hover:opacity-100 opacity-50 transition-opacity flex items-center justify-center gap-2 group/btn"
+        >
+          <span className="font-mono text-[9px] uppercase tracking-widest border-b border-transparent group-hover/btn:border-current">
+            {expanded ? 'COLLAPSE CARD' : 'EXPAND CARD'}
+          </span>
+        </div>
 
         <div className={`flex gap-4 border-t pt-2 mt-1`} style={{ borderColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
           <div className="flex items-center gap-1 opacity-40">
@@ -76,7 +103,7 @@ export const TweetCard: React.FC<{ tweet: Tweet; darkMode: boolean }> = ({ tweet
             <span className="font-mono text-[8px]">{TEXT.OPEN_SOURCE} // {tweet.id ? String(tweet.id).substring(0, 4) : '????'}</span>
           </div>
         </div>
-      </div>
-    </a>
+      </a>
+    </div>
   );
 };

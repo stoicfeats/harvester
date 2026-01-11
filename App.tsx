@@ -174,8 +174,6 @@ const App: React.FC = () => {
             totalTweets={tweets.length}
             tweets={tweets}
             darkMode={darkMode}
-            columnCount={columnCount}
-            setColumnCount={setColumnCount}
           />
 
           <motion.main
@@ -236,6 +234,45 @@ const App: React.FC = () => {
                     Login / Sync
                   </button>
                 )}
+              </div>
+
+              {/* Grid Controls */}
+              <div
+                className="pointer-events-auto flex items-center gap-1 px-2 py-2 rounded-full backdrop-blur-md shadow-lg transition-colors duration-500 ml-4"
+                style={{
+                  backgroundColor: darkMode ? 'rgba(42,42,42,0.8)' : 'rgba(255,255,255,0.6)',
+                  borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                  borderWidth: 1
+                }}
+              >
+                {[
+                  { label: 'LIST', cols: 1 },
+                  { label: 'BIGGER', cols: 2 },
+                  { label: 'BIG', cols: 3 },
+                  { label: 'SMALL', cols: 5 }
+                ].map((opt) => (
+                  <button
+                    key={opt.label}
+                    onClick={() => setColumnCount(opt.cols)}
+                    className={`relative px-3 py-1.5 rounded-full text-[10px] font-bold font-['Space_Grotesk'] tracking-tight transition-all`}
+                    style={{
+                      color: columnCount === opt.cols
+                        ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
+                        : (darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT),
+                      opacity: columnCount === opt.cols ? 1 : 0.5
+                    }}
+                  >
+                    {columnCount === opt.cols && (
+                      <motion.div
+                        layoutId="grid-pill"
+                        className="absolute inset-0 rounded-full"
+                        style={{ backgroundColor: darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                    <span className="relative z-10">{opt.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 

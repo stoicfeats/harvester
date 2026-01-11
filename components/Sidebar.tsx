@@ -40,8 +40,6 @@ interface SidebarProps {
   totalTweets: number;
   tweets: Tweet[];
   darkMode: boolean;
-  columnCount: number;
-  setColumnCount: (n: number) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -50,9 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onLoginClick,
   totalTweets,
   tweets,
-  darkMode,
-  columnCount,
-  setColumnCount
+  darkMode
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPasteMode, setIsPasteMode] = useState(false);
@@ -316,30 +312,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      <div className={`p-6 rounded-[2px] transition-shadow duration-500`} style={{ backgroundColor: theme.BG, boxShadow: theme.SHADOW_INSET }}>
-        <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>{TEXT.VIEW_CONFIG}</label>
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center mb-1">
-            <span className="font-mono text-[9px] uppercase opacity-60" style={{ color: theme.TEXT }}>{TEXT.GRID_DENSITY}</span>
-            <span className="font-mono text-[9px] font-bold text-[#ff4d00]">{columnCount} COL</span>
-          </div>
-          <input
-            type="range"
-            min="1"
-            max="6"
-            value={columnCount}
-            onChange={(e) => setColumnCount(Number(e.target.value))}
-            className="w-full h-1 bg-black/10 rounded-none appearance-none cursor-pointer accent-[#ff4d00]"
-          />
-          <div className="flex justify-between mt-1 opacity-30 font-mono text-[8px]" style={{ color: theme.TEXT }}>
-            <span>EXPAND</span>
-            <span>DENSE</span>
-          </div>
-        </div>
-      </div>
+      {/* Grid Density Control Removed */}
 
       <div className={`p-6 rounded-[2px] transition-shadow duration-500`} style={{ backgroundColor: theme.BG, boxShadow: theme.SHADOW_INSET }}>
-        <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>Utility Protocols</label>
+        <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>Data Tools</label>
 
         <button
           onClick={() => { setIsScriptMode(!isScriptMode); setIsPasteMode(false); }}
@@ -350,7 +326,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             boxShadow: isScriptMode ? theme.SHADOW_ACTIVE : theme.SHADOW
           }}
         >
-          <span className="text-xs font-bold font-['Space_Grotesk'] tracking-tight opacity-70">{TEXT.GENERATE_SCRAPER}</span>
+          <span className="text-xs font-bold font-['Space_Grotesk'] tracking-tight opacity-70">Generate Bookmark Extractor</span>
           <span className="font-mono text-[10px] opacity-50">{isScriptMode ? 'ACTIVE' : 'SCRIPT'}</span>
         </button>
 
@@ -400,6 +376,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className={`p-4 border flex justify-between items-center transition-colors`} style={{ borderColor: theme.BORDER, backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
         <span className="font-mono text-[10px] font-bold" style={{ color: theme.TEXT }}>{TEXT.BUFFER_COUNT}</span>
         <span className="font-mono text-[10px] font-bold text-[#ff4d00]">{totalTweets}</span>
+      </div>
+      <div className={`px-4 py-2 border-l border-r border-b flex justify-between items-center transition-colors`} style={{ borderColor: theme.BORDER, backgroundColor: darkMode ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}>
+        <span className="font-mono text-[9px] opacity-60" style={{ color: theme.TEXT }}>TOTAL IMPORTED</span>
+        <span className="font-mono text-[9px] font-bold opacity-80" style={{ color: theme.TEXT }}>{totalTweets}</span>
       </div>
 
       <div className="mt-auto">
