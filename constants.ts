@@ -24,7 +24,7 @@ export const COLORS = {
 };
 
 export const TEXT = {
-    SYSTEM_PROTOCOL: 'System Protocol: 88-X',
+    APP_VERSION: 'App Version: 1.2.0',
     TITLE: 'Harvester',
     LIVE_STREAM: 'Live Stream Active',
     STREAM_ACTIVE: 'STREAM_ACTIVE',

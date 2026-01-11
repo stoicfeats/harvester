@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Tweet } from '../types';
 import { TEXT, COLORS } from '../constants';
 import { User } from 'firebase/auth';
@@ -314,63 +315,132 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Grid Density Control Removed */}
 
-      <div className={`p-6 rounded-[2px] transition-shadow duration-500`} style={{ backgroundColor: theme.BG, boxShadow: theme.SHADOW_INSET }}>
-        <label className="font-mono text-[10px] uppercase font-bold opacity-50 block mb-4" style={{ color: theme.TEXT }}>Data Tools</label>
-
+      <div
+        className={`p-6 rounded-[4px] transition-all duration-500 border-l-2`}
+        style={{
+          backgroundColor: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+          borderColor: isScriptMode ? '#ff4d00' : 'transparent',
+          boxShadow: theme.SHADOW_INSET
+        }}
+      >
         <button
           onClick={() => { setIsScriptMode(!isScriptMode); setIsPasteMode(false); }}
-          className={`w-full py-3 px-4 text-left flex justify-between items-center transition-all rounded-[1px]`}
-          style={{
-            backgroundColor: theme.BG,
-            color: theme.TEXT,
-            boxShadow: isScriptMode ? theme.SHADOW_ACTIVE : theme.SHADOW
-          }}
+          className={`w-full flex justify-between items-center group`}
         >
-          <span className="text-xs font-bold font-['Space_Grotesk'] tracking-tight opacity-70">Generate Bookmark Extractor</span>
-          <span className="font-mono text-[10px] opacity-50">{isScriptMode ? 'ACTIVE' : 'SCRIPT'}</span>
+          <div className="text-left">
+            <span className="block font-mono text-[9px] uppercase font-bold opacity-50 mb-1" style={{ color: theme.TEXT }}>
+              One Click Import
+            </span>
+            <span className="text-sm font-bold font-['Space_Grotesk'] tracking-tight group-hover:text-[#ff4d00] transition-colors" style={{ color: theme.TEXT }}>
+              How to import your bookmarks?
+            </span>
+          </div>
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-transform duration-300 ${isScriptMode ? 'rotate-180' : ''}`} style={{ backgroundColor: theme.SHADOW }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={theme.TEXT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+          </div>
         </button>
 
-        {isScriptMode && (
-          <div className="animate-reveal flex flex-col gap-3 mt-4">
-            <div className="flex flex-col gap-1">
-              <label className="font-mono text-[9px] uppercase opacity-60" style={{ color: theme.TEXT }}>{TEXT.TARGET_COUNT}</label>
-              <input
-                type="number"
-                value={targetCount}
-                onChange={(e) => setTargetCount(Number(e.target.value))}
-                className="w-full border-b font-mono text-sm py-1 focus:outline-none focus:border-[#ff4d00]"
-                style={{
-                  backgroundColor: theme.BG,
-                  borderColor: darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-                  color: theme.TEXT
-                }}
-              />
-            </div>
-
-            <button
-              onClick={generateScraperScript}
-              className="w-full py-2 font-mono text-[10px] uppercase font-bold hover:bg-[#ff4d00] hover:text-[#1a1a1a] transition-colors"
-              style={{ backgroundColor: darkMode ? '#e2e0d9' : '#1a1a1a', color: darkMode ? '#1a1a1a' : '#e2e0d9' }}
+        <AnimatePresence>
+          {isScriptMode && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
             >
-              {TEXT.COMPILE_SCRIPT}
-            </button>
+              <div className="pt-6 flex flex-col gap-4">
 
-            {generatedScript && (
-              <div className="relative group">
-                <textarea
-                  readOnly
-                  value={generatedScript}
-                  className="w-full h-24 text-[10px] font-mono p-2 rounded-[1px] resize-none focus:outline-none border"
-                  style={{
-                    backgroundColor: darkMode ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.05)',
-                    borderColor: theme.BORDER,
-                    color: theme.TEXT
-                  }}
-                />
+                {/* Step 1 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#ff4d00]/10 flex items-center justify-center text-[#ff4d00] font-mono text-[10px] font-bold">1</div>
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold mb-2 opacity-80" style={{ color: theme.TEXT }}>How many bookmarks do you want?</p>
+                    <input
+                      type="number"
+                      value={targetCount}
+                      onChange={(e) => setTargetCount(Number(e.target.value))}
+                      className="w-full border-b font-mono text-sm py-1 focus:outline-none focus:border-[#ff4d00] bg-transparent"
+                      style={{
+                        borderColor: darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+                        color: theme.TEXT
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Step 2 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#ff4d00]/10 flex items-center justify-center text-[#ff4d00] font-mono text-[10px] font-bold">2</div>
+                  <div className="flex-1">
+                    <p className="text-[10px] font-bold mb-2 opacity-80" style={{ color: theme.TEXT }}>Get the magic script</p>
+                    <button
+                      onClick={generateScraperScript}
+                      className="w-full py-2 font-mono text-[10px] uppercase font-bold hover:bg-[#ff4d00] hover:text-white transition-colors border"
+                      style={{
+                        backgroundColor: 'transparent',
+                        borderColor: theme.BORDER,
+                        color: theme.TEXT
+                      }}
+                    >
+                      {generatedScript ? 'Regenerate Script' : 'Generate Script'}
+                    </button>
+
+                    {generatedScript && (
+                      <div className="mt-2 relative">
+                        <textarea
+                          readOnly
+                          value={generatedScript}
+                          className="w-full h-20 text-[9px] font-mono p-2 rounded-[1px] resize-none focus:outline-none border opacity-60"
+                          style={{
+                            backgroundColor: darkMode ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.05)',
+                            borderColor: theme.BORDER,
+                            color: theme.TEXT
+                          }}
+                          onClick={(e) => (e.target as HTMLTextAreaElement).select()}
+                        />
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(generatedScript);
+                            alert("SCRIPT COPIED TO CLIPBOARD");
+                          }}
+                          className="absolute top-2 right-2 flex items-center gap-1 text-[9px] bg-[#ff4d00] text-white px-2 py-1 rounded hover:brightness-110 active:scale-95 transition-all"
+                        >
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          COPY SCRIPT
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 3 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#ff4d00]/10 flex items-center justify-center text-[#ff4d00] font-mono text-[10px] font-bold">3</div>
+                  <div className="flex-1">
+                    <p className="text-[10px] opacity-70 leading-relaxed" style={{ color: theme.TEXT }}>
+                      Go to your <a href="https://twitter.com/i/bookmarks" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#ff4d00]">Twitter/X Bookmarks</a> page.
+                      <br />
+                      Open Console (<span className="font-mono bg-white/10 px-1">F12</span> or <span className="font-mono bg-white/10 px-1">Cmd+Opt+J</span>).
+                      <br />
+                      Paste the script & Enter.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Step 4 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-[#ff4d00]/10 flex items-center justify-center text-[#ff4d00] font-mono text-[10px] font-bold">4</div>
+                  <div className="flex-1">
+                    <p className="text-[10px] opacity-70 leading-relaxed" style={{ color: theme.TEXT }}>
+                      Wait for the download to finish, then drag & drop the <span className="font-mono">.json</span> file above.
+                    </p>
+                  </div>
+                </div>
+
               </div>
-            )}
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className={`p-4 border flex justify-between items-center transition-colors`} style={{ borderColor: theme.BORDER, backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>

@@ -36,7 +36,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [tweets, setTweets] = useState<Tweet[]>([]);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const [columnCount, setColumnCount] = useState(3);
   const [activeSegment, setActiveSegment] = useState(SEGMENTS[0].id);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -181,98 +181,110 @@ const App: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="flex-1 overflow-y-auto scrollbar-hide relative flex flex-col"
           >
-            <div className="sticky top-0 z-30 w-full flex justify-center py-4 pointer-events-none">
+            <div className="sticky top-0 z-30 w-full py-4 pointer-events-none">
               <div
-                className="pointer-events-auto flex items-center gap-2 px-2 py-2 rounded-full backdrop-blur-md shadow-lg transition-colors duration-500"
-                style={{
-                  backgroundColor: darkMode ? 'rgba(42,42,42,0.8)' : 'rgba(255,255,255,0.6)',
-                  borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                  borderWidth: 1
-                }}
+                className="pointer-events-auto w-full flex items-center justify-between gap-4 px-6 overflow-x-auto scrollbar-hide"
               >
-                {SEGMENTS.map(seg => (
-                  <button
-                    key={seg.id}
-                    onClick={() => setActiveSegment(seg.id)}
-                    className={`relative px-4 py-1.5 rounded-full text-xs font-bold font-['Space_Grotesk'] tracking-tight transition-all`}
+                {/* Left Spacer (Desktop only) */}
+                <div className="hidden md:block flex-1" />
+
+                {/* Segments (Center) */}
+                <div
+                  className="flex-shrink-0 flex items-center gap-2 px-2 py-2 rounded-full backdrop-blur-md shadow-lg transition-colors duration-500"
+                  style={{
+                    backgroundColor: darkMode ? 'rgba(42,42,42,0.8)' : 'rgba(255,255,255,0.6)',
+                    borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                    borderWidth: 1
+                  }}
+                >
+                  {SEGMENTS.map(seg => (
+                    <button
+                      key={seg.id}
+                      onClick={() => setActiveSegment(seg.id)}
+                      className={`relative px-4 py-1.5 rounded-full text-xs font-bold font-['Space_Grotesk'] tracking-tight transition-all whitespace-nowrap`}
+                      style={{
+                        color: activeSegment === seg.id
+                          ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
+                          : (darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT)
+                      }}
+                    >
+                      {activeSegment === seg.id && (
+                        <motion.div
+                          layoutId="segment-pill"
+                          className="absolute inset-0 rounded-full"
+                          style={{ backgroundColor: darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT }}
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                      )}
+                      <span className="relative z-10">{seg.label}</span>
+                    </button>
+                  ))}
+
+                  <div className="mx-1 h-4 w-px bg-current opacity-20" />
+
+                  {user ? (
+                    <button
+                      onClick={() => auth && signOut(auth)}
+                      className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-500/20 text-red-500 transition-colors"
+                      title="Sign Out"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                      </svg>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setIsLoginModalOpen(true)}
+                      className="px-3 py-1 rounded-full flex items-center justify-center hover:bg-green-500/20 text-green-500 transition-colors border border-green-500/30 text-[10px] font-mono uppercase whitespace-nowrap"
+                      title="Login to Sync"
+                    >
+                      Login / Sync
+                    </button>
+                  )}
+                </div>
+
+                {/* Grid Controls (Right) */}
+                <div className="flex-1 flex justify-end">
+                  <div
+                    className="flex-shrink-0 flex items-center gap-1 px-2 py-2 rounded-full backdrop-blur-md shadow-lg transition-colors duration-500"
                     style={{
-                      color: activeSegment === seg.id
-                        ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
-                        : (darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT)
+                      backgroundColor: darkMode ? 'rgba(42,42,42,0.8)' : 'rgba(255,255,255,0.6)',
+                      borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                      borderWidth: 1
                     }}
                   >
-                    {activeSegment === seg.id && (
-                      <motion.div
-                        layoutId="segment-pill"
-                        className="absolute inset-0 rounded-full"
-                        style={{ backgroundColor: darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10">{seg.label}</span>
-                  </button>
-                ))}
-
-                {user ? (
-                  <button
-                    onClick={() => auth && signOut(auth)}
-                    className="ml-2 w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-500/20 text-red-500 transition-colors"
-                    title="Sign Out"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                      <polyline points="16 17 21 12 16 7"></polyline>
-                      <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setIsLoginModalOpen(true)}
-                    className="ml-2 px-3 py-1 rounded-full flex items-center justify-center hover:bg-green-500/20 text-green-500 transition-colors border border-green-500/30 text-[10px] font-mono uppercase"
-                    title="Login to Sync"
-                  >
-                    Login / Sync
-                  </button>
-                )}
-              </div>
-
-              {/* Grid Controls */}
-              <div
-                className="pointer-events-auto flex items-center gap-1 px-2 py-2 rounded-full backdrop-blur-md shadow-lg transition-colors duration-500 ml-4"
-                style={{
-                  backgroundColor: darkMode ? 'rgba(42,42,42,0.8)' : 'rgba(255,255,255,0.6)',
-                  borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                  borderWidth: 1
-                }}
-              >
-                {[
-                  { label: 'LIST', cols: 1 },
-                  { label: 'BIGGER', cols: 2 },
-                  { label: 'BIG', cols: 3 },
-                  { label: 'SMALL', cols: 5 }
-                ].map((opt) => (
-                  <button
-                    key={opt.label}
-                    onClick={() => setColumnCount(opt.cols)}
-                    className={`relative px-3 py-1.5 rounded-full text-[10px] font-bold font-['Space_Grotesk'] tracking-tight transition-all`}
-                    style={{
-                      color: columnCount === opt.cols
-                        ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
-                        : (darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT),
-                      opacity: columnCount === opt.cols ? 1 : 0.5
-                    }}
-                  >
-                    {columnCount === opt.cols && (
-                      <motion.div
-                        layoutId="grid-pill"
-                        className="absolute inset-0 rounded-full"
-                        style={{ backgroundColor: darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10">{opt.label}</span>
-                  </button>
-                ))}
+                    {[
+                      { label: 'LIST', cols: 1 },
+                      { label: 'LARGE', cols: 2 },
+                      { label: 'MEDIUM', cols: 3 },
+                      { label: 'COMPACT', cols: 5 }
+                    ].map((opt) => (
+                      <button
+                        key={opt.label}
+                        onClick={() => setColumnCount(opt.cols)}
+                        className={`relative px-3 py-1.5 rounded-full text-[10px] font-bold font-['Space_Grotesk'] tracking-tight transition-all`}
+                        style={{
+                          color: columnCount === opt.cols
+                            ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
+                            : (darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT),
+                          opacity: columnCount === opt.cols ? 1 : 0.5
+                        }}
+                      >
+                        {columnCount === opt.cols && (
+                          <motion.div
+                            layoutId="grid-pill"
+                            className="absolute inset-0 rounded-full"
+                            style={{ backgroundColor: darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                        <span className="relative z-10">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 

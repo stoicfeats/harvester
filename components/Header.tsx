@@ -11,14 +11,20 @@ export const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode }) => {
   const theme = darkMode ? COLORS.DARK : COLORS.LIGHT;
 
   return (
-    <header className="flex justify-between items-end border-b-2 pb-4 select-none transition-colors duration-500" style={{ borderColor: darkMode ? theme.TEXT : 'black' }}>
-      <div>
-        <p className="font-mono text-xs uppercase tracking-widest mb-2 opacity-60">{TEXT.SYSTEM_PROTOCOL}</p>
-        <h1 className="font-['Space_Grotesk'] text-6xl font-bold tracking-tighter uppercase leading-none">
+    <header className="flex justify-between items-start border-b-2 py-4 select-none transition-colors duration-500 relative" style={{ borderColor: darkMode ? theme.TEXT : 'black' }}>
+      {/* Left: Branding */}
+      <div className="flex flex-col">
+        <p className="font-mono text-[10px] uppercase tracking-widest mb-1 opacity-60">{TEXT.APP_VERSION}</p>
+        <h1 className="font-['Space_Grotesk'] text-5xl font-bold tracking-tighter uppercase leading-none mb-1">
           {TEXT.TITLE}
         </h1>
+        <p className="font-mono text-[10px] font-bold tracking-widest uppercase opacity-50">
+          View all your bookmarks in one place in one click
+        </p>
       </div>
-      <div className="flex items-center gap-6 mb-2">
+
+      {/* Right: Controls */}
+      <div className="flex items-center gap-6 mt-2">
         <div
           onClick={toggleDarkMode}
           className={`w-14 h-8 rounded-full relative cursor-pointer flex items-center px-1 transition-colors duration-300`}
@@ -42,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode }) => {
           </motion.div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-3">
           <div className="w-2 h-2 rounded-full animate-live-dot" style={{ backgroundColor: COLORS.LIGHT.ACCENT }}></div>
           <span className="font-mono text-sm font-bold uppercase tracking-tighter">{TEXT.LIVE_STREAM}</span>
         </div>
