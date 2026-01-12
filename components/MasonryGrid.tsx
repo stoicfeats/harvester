@@ -8,9 +8,10 @@ interface MasonryGridProps {
   tweets: Tweet[];
   columnCount: number;
   darkMode: boolean;
+  onToggleStar: (tweetId: string) => void;
 }
 
-export const MasonryGrid: React.FC<MasonryGridProps> = ({ tweets, columnCount, darkMode }) => {
+export const MasonryGrid: React.FC<MasonryGridProps> = ({ tweets, columnCount, darkMode, onToggleStar }) => {
   if (tweets.length === 0) {
     return (
       <div className={`h-full flex flex-col items-center justify-center select-none transition-opacity duration-1000 ${darkMode ? 'opacity-30' : 'opacity-40'}`}>
@@ -38,7 +39,7 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ tweets, columnCount, d
             transition={{ duration: 0.4, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
             className="break-inside-avoid mb-6"
           >
-            <TweetCard tweet={tweet} darkMode={darkMode} />
+            <TweetCard tweet={tweet} darkMode={darkMode} onToggleStar={onToggleStar} />
           </motion.div>
         ))}
       </AnimatePresence>

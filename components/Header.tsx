@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ darkMode, toggleDarkMode }) => {
           {TEXT.TITLE}
         </h1>
         <p className="font-mono text-[10px] font-bold tracking-widest uppercase opacity-50">
-          View all your bookmarks in one place in one click
+          View all your twitter bookmark in one glance.
         </p>
       </div>
 

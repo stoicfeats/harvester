@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { onAuthStateChanged, signInWithPopup, User, signOut } from 'firebase/auth';
 import { auth, googleProvider, db, isFirebaseInitialized } from './firebaseConfig';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { TextureOverlay } from './components/TextureOverlay';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
@@ -104,9 +104,22 @@ const App: React.FC = () => {
     setTweets(newTweets);
   };
 
+  const toggleStar = async (tweetId: string) => {
+    const updatedTweets = tweets.map(t =>
+      t.id === tweetId ? { ...t, isStarred: !t.isStarred } : t
+    );
+    setTweets(updatedTweets);
+
+    if (user && db) {
+      const tweetRef = doc(db, `users/${user.uid}/tweets`, tweetId);
+      const tweetToUpdate = tweets.find(t => t.id === tweetId);
+      await updateDoc(tweetRef, { isStarred: !tweetToUpdate?.isStarred });
+    }
+  };
+
   const filteredTweets = tweets.filter(t => {
     if (activeSegment === 'MEDIA') return t.extended_entities?.media && t.extended_entities.media.length > 0;
-    if (activeSegment === 'FAVORITES') return (t.favorite_count || 0) > 0;
+    if (activeSegment === 'FAVORITES') return t.isStarred || (t.favorite_count || 0) > 1000;
     if (activeSegment === 'THREADS') return t.full_text.length > 200;
     return true;
   });
@@ -182,67 +195,67 @@ const App: React.FC = () => {
             className="flex-1 overflow-y-auto scrollbar-hide relative flex flex-col"
           >
             <div className="sticky top-0 z-30 w-full py-4 pointer-events-none">
-              <div
-                className="pointer-events-auto w-full flex items-center justify-between gap-4 px-6 overflow-x-auto scrollbar-hide"
-              >
+              <div className="w-full flex items-center justify-between px-6">
                 {/* Left Spacer (Desktop only) */}
                 <div className="hidden md:block flex-1" />
 
-                {/* Segments (Center) */}
-                <div
-                  className="flex-shrink-0 flex items-center gap-2 px-2 py-2 rounded-full backdrop-blur-md shadow-lg transition-colors duration-500"
-                  style={{
-                    backgroundColor: darkMode ? 'rgba(42,42,42,0.8)' : 'rgba(255,255,255,0.6)',
-                    borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                    borderWidth: 1
-                  }}
-                >
-                  {SEGMENTS.map(seg => (
-                    <button
-                      key={seg.id}
-                      onClick={() => setActiveSegment(seg.id)}
-                      className={`relative px-4 py-1.5 rounded-full text-xs font-bold font-['Space_Grotesk'] tracking-tight transition-all whitespace-nowrap`}
-                      style={{
-                        color: activeSegment === seg.id
-                          ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
-                          : (darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT)
-                      }}
-                    >
-                      {activeSegment === seg.id && (
-                        <motion.div
-                          layoutId="segment-pill"
-                          className="absolute inset-0 rounded-full"
-                          style={{ backgroundColor: darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT }}
-                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        />
-                      )}
-                      <span className="relative z-10">{seg.label}</span>
-                    </button>
-                  ))}
+                {/* Segments (Center) - offset by half of sidebar width (320/2 = 160px = ml-40) to center on literal screen */}
+                <div className="flex-shrink-0 md:-ml-40">
+                  <div
+                    className="flex items-center gap-2 px-2 py-2 rounded-full backdrop-blur-md shadow-lg transition-colors duration-500"
+                    style={{
+                      backgroundColor: darkMode ? 'rgba(42,42,42,0.8)' : 'rgba(255,255,255,0.6)',
+                      borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                      borderWidth: 1
+                    }}
+                  >
+                    {SEGMENTS.map(seg => (
+                      <button
+                        key={seg.id}
+                        onClick={() => setActiveSegment(seg.id)}
+                        className={`relative px-4 py-1.5 rounded-full text-xs font-bold font-['Space_Grotesk'] tracking-tight transition-all whitespace-nowrap`}
+                        style={{
+                          color: activeSegment === seg.id
+                            ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
+                            : (darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT)
+                        }}
+                      >
+                        {activeSegment === seg.id && (
+                          <motion.div
+                            layoutId="segment-pill"
+                            className="absolute inset-0 rounded-full"
+                            style={{ backgroundColor: darkMode ? COLORS.DARK.TEXT : COLORS.LIGHT.TEXT }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          />
+                        )}
+                        <span className="relative z-10">{seg.label}</span>
+                      </button>
+                    ))}
 
-                  <div className="mx-1 h-4 w-px bg-current opacity-20" />
+                    <div className="mx-1 h-4 w-px bg-current opacity-20" />
 
-                  {user ? (
-                    <button
-                      onClick={() => auth && signOut(auth)}
-                      className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-500/20 text-red-500 transition-colors"
-                      title="Sign Out"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                      </svg>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setIsLoginModalOpen(true)}
-                      className="px-3 py-1 rounded-full flex items-center justify-center hover:bg-green-500/20 text-green-500 transition-colors border border-green-500/30 text-[10px] font-mono uppercase whitespace-nowrap"
-                      title="Login to Sync"
-                    >
-                      Login / Sync
-                    </button>
-                  )}
+                    {user ? (
+                      <button
+                        onClick={() => auth && signOut(auth)}
+                        className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-500/20 text-red-500 transition-colors"
+                        title="Sign Out"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                          <polyline points="16 17 21 12 16 7"></polyline>
+                          <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsLoginModalOpen(true)}
+                        className="px-3 py-1 rounded-full flex items-center justify-center hover:bg-green-500/20 text-green-500 transition-colors border border-green-500/30 text-[10px] font-mono uppercase whitespace-nowrap"
+                        title="Login to Sync"
+                      >
+                        Login / Sync
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Grid Controls (Right) */}
@@ -293,7 +306,7 @@ const App: React.FC = () => {
               style={{ background: `linear-gradient(to bottom, ${theme.BG}, transparent)` }}
             />
 
-            <MasonryGrid tweets={filteredTweets} columnCount={columnCount} darkMode={darkMode} />
+            <MasonryGrid tweets={filteredTweets} columnCount={columnCount} darkMode={darkMode} onToggleStar={toggleStar} />
 
             <div
               className={`absolute bottom-0 left-0 w-full h-8 z-10 pointer-events-none transition-colors duration-500`}

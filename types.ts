@@ -31,4 +31,5 @@ export interface Tweet {
   };
   favorite_count?: number;
   retweet_count?: number;
+  isStarred?: boolean;
 }
