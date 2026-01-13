@@ -194,8 +194,8 @@ const App: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="flex-1 overflow-y-auto scrollbar-hide relative flex flex-col"
           >
-            <div className="sticky top-0 z-30 w-full py-4 pointer-events-none">
-              <div className="w-full flex items-center justify-between px-6">
+            <div className="sticky top-0 z-30 w-full py-4">
+              <div className="w-full flex items-center justify-between px-6 pointer-events-auto">
                 {/* Left Spacer (Desktop only) */}
                 <div className="hidden md:block flex-1" />
 
@@ -213,7 +213,7 @@ const App: React.FC = () => {
                       <button
                         key={seg.id}
                         onClick={() => setActiveSegment(seg.id)}
-                        className={`relative px-4 py-1.5 rounded-full text-xs font-bold font-['Space_Grotesk'] tracking-tight transition-all whitespace-nowrap`}
+                        className={`relative px-4 py-1.5 rounded-full text-xs font-bold font-['Space_Grotesk'] tracking-tight transition-all whitespace-nowrap cursor-pointer`}
                         style={{
                           color: activeSegment === seg.id
                             ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
@@ -277,7 +277,7 @@ const App: React.FC = () => {
                       <button
                         key={opt.label}
                         onClick={() => setColumnCount(opt.cols)}
-                        className={`relative px-3 py-1.5 rounded-full text-[10px] font-bold font-['Space_Grotesk'] tracking-tight transition-all`}
+                        className={`relative px-3 py-1.5 rounded-full text-[10px] font-bold font-['Space_Grotesk'] tracking-tight transition-all cursor-pointer`}
                         style={{
                           color: columnCount === opt.cols
                             ? (darkMode ? COLORS.LIGHT.TEXT : COLORS.DARK.TEXT)
